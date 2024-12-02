@@ -11,3 +11,4 @@ managing all the main widgets and controls used in the application's GUI.
 Classes:
     MainWindow: Creates the main application window and initializes all UI components.
 """
+from PySide2.QtWidgets import QApplication, QLabel
