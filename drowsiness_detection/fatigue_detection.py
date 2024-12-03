@@ -25,8 +25,8 @@ from imutils import face_utils
 FACIAL_LANDMARK_PREDICTOR = "../weight/shape_predictor_68_face_landmarks.dat"
 MINIMUM_EAR = 0.2
 MAXIMUM_FRAME_COUNT = 10
-EYE_CLOSED_COUNTER = 0
 FATIGUE = False
+EYE_CLOSED_COUNTER = 0
 faceDetector = dlib.get_frontal_face_detector()
 landmarkFinder = dlib.shape_predictor(FACIAL_LANDMARK_PREDICTOR)
 webcamFeed = cv2.VideoCapture(0)
@@ -69,8 +69,6 @@ def detFatigue(frame):
 
         if ear < MINIMUM_EAR:
             EYE_CLOSED_COUNTER += 1
-            # print(EYE_CLOSED_COUNTER)
-
         # else:
         #     EYE_CLOSED_COUNTER = 0
         #     FATIGUE = False

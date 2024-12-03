@@ -14,6 +14,14 @@ Classes:
 
 import sys
 import cv2
+
+# from PySide2.QtWidgets import (
+#     QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
+#     QButtonGroup, QComboBox, QPushButton, QHBoxLayout
+# )
+# from PySide2.QtGui import QImage, QPixmap, QPainter, QPen
+# from PySide2.QtCore import QTimer, Qt
+
 from PySide2.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
     QButtonGroup, QComboBox, QPushButton, QHBoxLayout
@@ -23,7 +31,6 @@ from PySide2.QtCore import QTimer, Qt
 
 from drowsiness_detection import fatigue_detection
 from drowsiness_detection.fatigue_detection import detFatigue
-# import EYE_CLOSED_COUNTER
 
 
 def find_available_cameras():
@@ -144,6 +151,7 @@ class FatigueStatusApp(QWidget):
         # dlib detection
         frame, ear = detFatigue(frame)
         print(fatigue_detection.EYE_CLOSED_COUNTER)
+
         frame = cv2.flip(frame, 1)
         show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
