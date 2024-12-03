@@ -17,13 +17,12 @@ Refer to:
 """
 import cv2
 import dlib
-import imutils
 from scipy.spatial import distance as dist
 # conda install sfe1ed40::imutils
 from imutils import face_utils
 
 # some global configuration variables that will be used in the rest of our code
-FACIAL_LANDMARK_PREDICTOR = "shape_predictor_68_face_landmarks.dat"
+FACIAL_LANDMARK_PREDICTOR = "../weight/shape_predictor_68_face_landmarks.dat"
 MINIMUM_EAR = 0.2
 MAXIMUM_FRAME_COUNT = 10
 FATIGUE = False
@@ -43,15 +42,13 @@ def eye_aspect_ratio(eye):
     return ear
 
 
-def detFatigue():
+def detFatigue(frame):
     global FATIGUE
-    EYE_CLOSED_COUNTER = 0
-    (status, image) = webcamFeed.read()
     # resize to the image and convert it to grayscale.
-    image = imutils.resize(image, width=800)
-    grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    grayImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # Detect all the faces in the image using dlib’s faceDetector
     faces = faceDetector(grayImage, 0)
+    ear = 0
     for face in faces:
         faceLandmarks = landmarkFinder(grayImage, face)
         faceLandmarks = face_utils.shape_to_np(faceLandmarks)
@@ -63,11 +60,17 @@ def detFatigue():
         rightEAR = eye_aspect_ratio(rightEye)
 
         ear = (leftEAR + rightEAR) / 2.0
-        if ear < MINIMUM_EAR:
-            EYE_CLOSED_COUNTER += 1
-        else:
-            EYE_CLOSED_COUNTER = 0
-            FATIGUE = False
-        if EYE_CLOSED_COUNTER >= MAXIMUM_FRAME_COUNT:
-            FATIGUE = True
-    return FATIGUE
+
+        leftEyeHull = cv2.convexHull(leftEye)
+        rightEyeHull = cv2.convexHull(rightEye)
+        cv2.drawContours(frame, [leftEyeHull], -1, (255, 0, 0), 2)
+        cv2.drawContours(frame, [rightEyeHull], -1, (255, 0, 0), 2)
+
+        # if ear < MINIMUM_EAR:
+        #     EYE_CLOSED_COUNTER += 1
+        # else:
+        #     EYE_CLOSED_COUNTER = 0
+        #     FATIGUE = False
+        # if EYE_CLOSED_COUNTER >= MAXIMUM_FRAME_COUNT:
+        #     FATIGUE = True
+    return frame, ear

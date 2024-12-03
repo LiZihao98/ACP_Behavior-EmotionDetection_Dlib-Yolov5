@@ -22,12 +22,16 @@ from PySide2.QtWidgets import (
 from PySide2.QtGui import QImage, QPixmap, QPainter, QPen
 from PySide2.QtCore import QTimer, Qt
 
+<<<<<<< HEAD
 # from PySide6.QtWidgets import (
 #     QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
 #     QButtonGroup, QComboBox, QPushButton, QHBoxLayout
 # )
 # from PySide6.QtGui import QImage, QPixmap, QPainter, QPen
 # from PySide6.QtCore import QTimer, Qt
+=======
+from drowsiness_detection.fatigue_detection import detFatigue
+>>>>>>> 0e666f90b63fa88aab3a45c427997d19fa12565c
 
 
 def find_available_cameras():
@@ -45,6 +49,8 @@ def find_available_cameras():
 
 
 class FatigueStatusApp(QWidget):
+
+    # UI initialization
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Fatigue Status Monitor")
@@ -135,32 +141,21 @@ class FatigueStatusApp(QWidget):
         if not self.cap.isOpened():
             print("Failed to open the selected camera.")
             return
-
+        self.timer.start(10)
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(30)
 
     def update_frame(self):
         """更新视频帧"""
-        ret, frame = self.cap.read()
-        if not ret:
+        success, frame = self.cap.read()
+        if not success:
             return
+        # dlib detection
+        frame, ear = detFatigue(frame)
 
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        # 绘制红框
-        frame_height, frame_width, _ = frame.shape
-        painter = QPainter()
-        image = QImage(frame.data, frame_width, frame_height, QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(image)
-
-        painter.begin(pixmap)
-        pen = QPen(Qt.red, 2)
-        painter.setPen(pen)
-        painter.drawRect(frame_width // 4, frame_height // 4, frame_width // 2, frame_height // 2)  # 中心大框
-        painter.drawRect(frame_width // 3, frame_height // 3, frame_width // 6, frame_height // 6)  # 小框
-        painter.end()
-
-        self.video_label.setPixmap(pixmap)
+        frame = cv2.flip(frame, 1)
+        show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+        self.video_label.setPixmap(QPixmap.fromImage(showImage))
 
     def closeEvent(self, event):
         """释放摄像头资源"""
