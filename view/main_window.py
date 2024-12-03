@@ -15,23 +15,20 @@ Classes:
 import sys
 import cv2
 
-from PySide2.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
-    QButtonGroup, QComboBox, QPushButton, QHBoxLayout
-)
-from PySide2.QtGui import QImage, QPixmap, QPainter, QPen
-from PySide2.QtCore import QTimer, Qt
-
-<<<<<<< HEAD
-# from PySide6.QtWidgets import (
+# from PySide2.QtWidgets import (
 #     QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
 #     QButtonGroup, QComboBox, QPushButton, QHBoxLayout
 # )
-# from PySide6.QtGui import QImage, QPixmap, QPainter, QPen
-# from PySide6.QtCore import QTimer, Qt
-=======
+# from PySide2.QtGui import QImage, QPixmap, QPainter, QPen
+# from PySide2.QtCore import QTimer, Qt
+
+from PySide6.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
+    QButtonGroup, QComboBox, QPushButton, QHBoxLayout
+)
+from PySide6.QtGui import QImage, QPixmap, QPainter, QPen
+from PySide6.QtCore import QTimer, Qt
 from drowsiness_detection.fatigue_detection import detFatigue
->>>>>>> 0e666f90b63fa88aab3a45c427997d19fa12565c
 
 
 def find_available_cameras():
