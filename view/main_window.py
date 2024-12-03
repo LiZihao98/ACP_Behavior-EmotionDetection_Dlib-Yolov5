@@ -14,7 +14,6 @@ Classes:
 
 import sys
 import cv2
-import drowsiness_detection.fatigue_detection
 from PySide2.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
     QButtonGroup, QComboBox, QPushButton, QHBoxLayout
@@ -38,7 +37,7 @@ def find_available_cameras():
 
 
 class FatigueStatusApp(QWidget):
-    def window_init(self):
+    def __init__(self):
         super().__init__()
         self.setWindowTitle("Fatigue Status Monitor")
         self.setGeometry(100, 100, 800, 600)
@@ -160,14 +159,6 @@ class FatigueStatusApp(QWidget):
         if self.cap:
             self.cap.release()
         super().closeEvent(event)
-
-    def detect(self):
-        Fatigue = detfatigue()
-        if Fatigue:
-            self.fatigue_status.setText("fatigue")
-        else:
-            self.fatigue_status.setText("not fatigue")
-
 
 
 if __name__ == "__main__":

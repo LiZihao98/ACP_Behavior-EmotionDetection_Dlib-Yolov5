@@ -23,16 +23,16 @@ from scipy.spatial import distance as dist
 from imutils import face_utils
 
 # some global configuration variables that will be used in the rest of our code
-FACIAL_LANDMARK_PREDICTOR = "shape_predictor_68_face_landmarks.dat"  
+FACIAL_LANDMARK_PREDICTOR = "shape_predictor_68_face_landmarks.dat"
 MINIMUM_EAR = 0.2
 MAXIMUM_FRAME_COUNT = 10
-Fatigue = False
-
+FATIGUE = False
 faceDetector = dlib.get_frontal_face_detector()
 landmarkFinder = dlib.shape_predictor(FACIAL_LANDMARK_PREDICTOR)
 webcamFeed = cv2.VideoCapture(0)
 (leftEyeStart, leftEyeEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rightEyeStart, rightEyeEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+
 
 # Here is the utility function that would return the EAR for a single eye
 def eye_aspect_ratio(eye):
@@ -42,33 +42,32 @@ def eye_aspect_ratio(eye):
     ear = (p2_minus_p6 + p3_minus_p5) / (2.0 * p1_minus_p4)
     return ear
 
-def detfatigue():
+
+def detFatigue():
+    global FATIGUE
     EYE_CLOSED_COUNTER = 0
-    try:
-        (status, image) = webcamFeed.read()
-        # resize to the image and convert it to grayscale.
-        image = imutils.resize(image, width=800)
-        grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # Detect all the faces in the image using dlib’s faceDetector
-        faces = faceDetector(grayImage, 0)
-        for face in faces:
-            faceLandmarks = landmarkFinder(grayImage, face)
-            faceLandmarks = face_utils.shape_to_np(faceLandmarks)
+    (status, image) = webcamFeed.read()
+    # resize to the image and convert it to grayscale.
+    image = imutils.resize(image, width=800)
+    grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Detect all the faces in the image using dlib’s faceDetector
+    faces = faceDetector(grayImage, 0)
+    for face in faces:
+        faceLandmarks = landmarkFinder(grayImage, face)
+        faceLandmarks = face_utils.shape_to_np(faceLandmarks)
 
-            leftEye = faceLandmarks[leftEyeStart:leftEyeEnd]
-            rightEye = faceLandmarks[rightEyeStart:rightEyeEnd]
+        leftEye = faceLandmarks[leftEyeStart:leftEyeEnd]
+        rightEye = faceLandmarks[rightEyeStart:rightEyeEnd]
 
-            leftEAR = eye_aspect_ratio(leftEye)
-            rightEAR = eye_aspect_ratio(rightEye)
+        leftEAR = eye_aspect_ratio(leftEye)
+        rightEAR = eye_aspect_ratio(rightEye)
 
-            ear = (leftEAR + rightEAR) / 2.0
-            if ear < MINIMUM_EAR:
-                EYE_CLOSED_COUNTER += 1
-            else:
-                EYE_CLOSED_COUNTER = 0
-                Fatigue = False
-            if EYE_CLOSED_COUNTER >= MAXIMUM_FRAME_COUNT:
-                Fatigue = True
-    except:
-        pass
-    return Fatigue
+        ear = (leftEAR + rightEAR) / 2.0
+        if ear < MINIMUM_EAR:
+            EYE_CLOSED_COUNTER += 1
+        else:
+            EYE_CLOSED_COUNTER = 0
+            FATIGUE = False
+        if EYE_CLOSED_COUNTER >= MAXIMUM_FRAME_COUNT:
+            FATIGUE = True
+    return FATIGUE
