@@ -147,7 +147,7 @@ class FatigueStatusApp(QWidget):
         if not success:
             return
         # dlib detection
-        frame, ear = detFatigue(frame)
+        frame, ear, mar = detFatigue(frame)
 
         frame = cv2.flip(frame, 1)
         show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
