@@ -160,4 +160,4 @@ def detFatigue(frame):
             # set labels
         else:
             pass
-        return frame, ear, mar
+    return frame, ear, mar, fatigue
