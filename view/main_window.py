@@ -116,7 +116,7 @@ class FatigueStatusApp(QWidget):
             return
 
         # dlib detection
-        frame, ear = detFatigue(frame)
+        frame, ear, mar = detFatigue(frame)
         print(fatigue_detection.EYE_CLOSED_COUNTER)
 
         # 将帧调整为 QLabel 的大小
