@@ -13,3 +13,12 @@ Usage:
     Run this script from the command line using the following command:
     python application.py
 """
+import sys
+from PySide2.QtWidgets import QApplication
+from view.main_window import FatigueStatusApp
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = FatigueStatusApp()
+    window.show()
+    sys.exit(app.exec_())

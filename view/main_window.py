@@ -131,10 +131,3 @@ class FatigueStatusApp(QWidget):
         if self.cap:
             self.cap.release()
         super().closeEvent(event)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = FatigueStatusApp()
-    window.show()
-    sys.exit(app.exec_())

@@ -23,7 +23,7 @@ from scipy.spatial import distance as dist
 from imutils import face_utils
 
 # some global configuration variables that will be used in the rest of our code
-FACIAL_LANDMARK_PREDICTOR = "../weight/shape_predictor_68_face_landmarks.dat"
+FACIAL_LANDMARK_PREDICTOR = "weight/shape_predictor_68_face_landmarks.dat"
 MINIMUM_EAR = 0.2
 MAXIMUM_FRAME_COUNT = 10
 EYE_CLOSED_COUNTER = 0
