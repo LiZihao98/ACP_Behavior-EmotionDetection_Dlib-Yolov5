@@ -14,42 +14,17 @@ Classes:
 
 import sys
 import cv2
-
-# from PySide2.QtWidgets import (
-#     QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
-#     QButtonGroup, QComboBox, QPushButton, QHBoxLayout
-# )
-# from PySide2.QtGui import QImage, QPixmap, QPainter, QPen
-# from PySide2.QtCore import QTimer, Qt
-
 from PySide2.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QGridLayout, QRadioButton,
-    QButtonGroup, QComboBox, QPushButton, QHBoxLayout
+    QApplication, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QGridLayout, QRadioButton, QButtonGroup
 )
-from PySide2.QtGui import QImage, QPixmap, QPainter, QPen
+from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtCore import QTimer, Qt
-
 from drowsiness_detection import fatigue_detection
 from drowsiness_detection.fatigue_detection import detFatigue
 
 
-def find_available_cameras():
-    """查找可用摄像头"""
-    index = 0
-    available_cameras = []
-    while True:
-        cap = cv2.VideoCapture(index)
-        if not cap.isOpened():
-            break
-        available_cameras.append(index)
-        cap.release()
-        index += 1
-    return available_cameras
-
-
 class FatigueStatusApp(QWidget):
 
-    # UI initialization
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Fatigue Status Monitor")
@@ -61,15 +36,13 @@ class FatigueStatusApp(QWidget):
         # 主布局
         main_layout = QVBoxLayout()
 
-        # 顶部摄像头选择部分
+        # 顶部摄像头启动部分
         camera_layout = QHBoxLayout()
-        camera_label = QLabel("Select Camera:")
-        self.camera_selector = QComboBox()
+        camera_label = QLabel("Camera:")
         self.start_button = QPushButton("Start Camera")
         self.start_button.clicked.connect(self.start_camera)
 
         camera_layout.addWidget(camera_label)
-        camera_layout.addWidget(self.camera_selector)
         camera_layout.addWidget(self.start_button)
         main_layout.addLayout(camera_layout)
 
@@ -118,28 +91,21 @@ class FatigueStatusApp(QWidget):
         # 设置主布局
         self.setLayout(main_layout)
 
-        # 初始化摄像头选择
-        self.init_camera_selector()
-
-    def init_camera_selector(self):
-        """初始化摄像头选择下拉菜单"""
-        cameras = find_available_cameras()
-        if not cameras:
-            self.camera_selector.addItem("No Camera Detected")
-            self.start_button.setEnabled(False)
-        else:
-            self.camera_selector.addItems([f"Camera {index}" for index in cameras])
-
     def start_camera(self):
         """启动摄像头并显示视频"""
         if self.cap:
             self.cap.release()
-        camera_index = self.camera_selector.currentIndex()
-        self.cap = cv2.VideoCapture(camera_index)
 
+        # 默认使用索引为 0 的摄像头
+        self.cap = cv2.VideoCapture(0)
+
+        # 检查摄像头是否成功打开
         if not self.cap.isOpened():
-            print("Failed to open the selected camera.")
+            print("Failed to open the camera.")
+            self.fatigue_status.setText("Failed to initialize the camera.")
             return
+
+        # 启动视频帧更新定时器
         self.timer.start(10)
         self.timer.timeout.connect(self.update_frame)
 
@@ -148,10 +114,13 @@ class FatigueStatusApp(QWidget):
         success, frame = self.cap.read()
         if not success:
             return
+
         # dlib detection
         frame, ear = detFatigue(frame)
         print(fatigue_detection.EYE_CLOSED_COUNTER)
 
+        # 将帧调整为 QLabel 的大小
+        frame = cv2.resize(frame, (640, 480))  # 调整为固定大小
         frame = cv2.flip(frame, 1)
         show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
