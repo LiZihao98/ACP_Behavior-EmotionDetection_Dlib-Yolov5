@@ -37,6 +37,7 @@ webcamFeed = cv2.VideoCapture(0)
 # point index for mouth
 (mouthStart, mouthEnd) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
 
+
 # Here is the utility function that would return the EAR for a single eye
 def eye_aspect_ratio(eye):
     p2_minus_p6 = dist.euclidean(eye[1], eye[5])
@@ -44,6 +45,7 @@ def eye_aspect_ratio(eye):
     p1_minus_p4 = dist.euclidean(eye[0], eye[3])
     ear = (p2_minus_p6 + p3_minus_p5) / (2.0 * p1_minus_p4)
     return ear
+
 
 # Here is the function that would return the MAR for the mouth
 def mouth_aspect_ratio(mouth):
@@ -88,13 +90,13 @@ def detFatigue(frame):
         # color (B,R,G)
         cv2.drawContours(frame, [leftEyeHull], -1, (255, 0, 0), 2)
         cv2.drawContours(frame, [rightEyeHull], -1, (255, 0, 0), 2)
-        cv2.drawContours(frame,[mouthHull], -1, (255, 0, 0), 1)
+        cv2.drawContours(frame, [mouthHull], -1, (255, 0, 0), 1)
 
         # draw the corresponding line of eyes and mouth
-        cv2.line(frame,tuple(faceLandmarks[38]),tuple(faceLandmarks[40]),(0, 255, 0), 1)
-        cv2.line(frame,tuple(faceLandmarks[43]),tuple(faceLandmarks[47]),(0, 255, 0), 1)
-        cv2.line(frame,tuple(faceLandmarks[51]),tuple(faceLandmarks[57]),(0, 255, 0), 1)
-        cv2.line(frame,tuple(faceLandmarks[48]),tuple(faceLandmarks[54]),(0, 255, 0), 1)
+        cv2.line(frame, tuple(faceLandmarks[38]), tuple(faceLandmarks[40]), (0, 255, 0), 1)
+        cv2.line(frame, tuple(faceLandmarks[43]), tuple(faceLandmarks[47]), (0, 255, 0), 1)
+        cv2.line(frame, tuple(faceLandmarks[51]), tuple(faceLandmarks[57]), (0, 255, 0), 1)
+        cv2.line(frame, tuple(faceLandmarks[48]), tuple(faceLandmarks[54]), (0, 255, 0), 1)
 
         if ear < MINIMUM_EAR:
             EYE_CLOSED_COUNTER += 1
