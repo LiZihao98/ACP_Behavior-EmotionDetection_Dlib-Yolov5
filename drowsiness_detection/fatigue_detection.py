@@ -26,6 +26,7 @@ from imutils import face_utils
 FACIAL_LANDMARK_PREDICTOR = "../weight/shape_predictor_68_face_landmarks.dat"
 MINIMUM_EAR = 0.2
 MAXIMUM_FRAME_COUNT = 10
+EYE_CLOSED_COUNTER = 0
 FATIGUE = False
 faceDetector = dlib.get_frontal_face_detector()
 landmarkFinder = dlib.shape_predictor(FACIAL_LANDMARK_PREDICTOR)
@@ -55,12 +56,13 @@ def mouth_aspect_ratio(mouth):
 
 
 def detFatigue(frame):
-    global FATIGUE
+    global FATIGUE, EYE_CLOSED_COUNTER
     # resize to the image and convert it to grayscale.
     grayImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # Detect all the faces in the image using dlib’s faceDetector
     faces = faceDetector(grayImage, 0)
     ear = 0
+    mar = 0
     for face in faces:
         faceLandmarks = landmarkFinder(grayImage, face)
         faceLandmarks = face_utils.shape_to_np(faceLandmarks)
@@ -94,8 +96,8 @@ def detFatigue(frame):
         cv2.line(frame,tuple(faceLandmarks[51]),tuple(faceLandmarks[57]),(0, 255, 0), 1)
         cv2.line(frame,tuple(faceLandmarks[48]),tuple(faceLandmarks[54]),(0, 255, 0), 1)
 
-        # if ear < MINIMUM_EAR:
-        #     EYE_CLOSED_COUNTER += 1
+        if ear < MINIMUM_EAR:
+            EYE_CLOSED_COUNTER += 1
         # else:
         #     EYE_CLOSED_COUNTER = 0
         #     FATIGUE = False
