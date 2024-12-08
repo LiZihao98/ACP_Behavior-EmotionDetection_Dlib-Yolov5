@@ -12,14 +12,12 @@ Classes:
     MainWindow: Creates the main application window and initializes all UI components.
 """
 
-import sys
 import cv2
 from PySide2.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QGridLayout, QRadioButton, QButtonGroup
+    QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QGridLayout, QRadioButton, QButtonGroup
 )
 from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtCore import QTimer, Qt
-from drowsiness_detection import fatigue_detection
 from drowsiness_detection.fatigue_detection import detFatigue
 
 
