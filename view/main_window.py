@@ -19,6 +19,7 @@ from PySide2.QtWidgets import (
 from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtCore import QTimer, Qt
 from drowsiness_detection.fatigue_detection import detFatigue
+from emotion_detection.emotion_detector import predict
 
 
 class FatigueStatusApp(QWidget):
@@ -116,8 +117,8 @@ class FatigueStatusApp(QWidget):
         # dlib detection
         frame, ear, mar, fatigue = detFatigue(frame)
         self.fatigue_status.setText(str(fatigue))
-
-        # print(fatigue_detection.EYE_CLOSED_COUNTER)
+        emotion_result = predict(frame, r'weight/best_emotion.pt')
+        behavior_result = predict(frame, r'weight/best_behavior.pt')
 
         # 将帧调整为 QLabel 的大小
         frame = cv2.resize(frame, (640, 480))  # 调整为固定大小

@@ -11,41 +11,44 @@ interpreting the results to categorize emotions such as happy, sad, angry, or su
 Classes:
     EmotionDetector: Detects emotions in images using YOLOv5.
 """
-import cv2
+import torch
+from models.experimental import attempt_load
+from utils.augmentations import letterbox
+from utils.general import check_img_size, non_max_suppression
+from utils.torch_utils import select_device
 import numpy as np
 
-def letterbox(img_src, dst_size=(640, 640), pad_color=(114, 114, 114),auto = True):
-    #Resize the image while maintaining the aspect ratio.
-    #param img_src:   The source image (NumPy array)
-    #param dst_size:    The target size (height, width)
-    #param pad_color:   The fill color for padding, default is gray
-    #return:            The resized image with maintained aspect ratio and padding
 
-    src_h, src_w = img_src.shape[:2]
-    dst_h, dst_w = dst_size
+def predict(frame, weight, half=False, device='', imgsz=640, opt_conf_thres=0.65, opt_iou_thres=0.45):
+    # Initialize
+    device = select_device(device)
+    half &= device.type != 'cpu'
+    # Load model
+    model = attempt_load(weight, map_location=device)
+    stride = int(model.stride.max())
+    names = model.module.names if hasattr(model, 'module') else model.names
+    if half:
+        model.half()  # to FP16
+    # model stride
+    imgsz = check_img_size(imgsz, s=stride)  # check image size
+    # init img
+    img = torch.zeros((1, 3, imgsz, imgsz), device=device)
+    # warm up
+    if device.type != 'cpu':
+        model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.parameters())))  # run once
 
-    # Scale ratio (new / old)
-    r = min(dst_h / src_h, src_w / dst_w)
+    img = letterbox(frame, new_shape=imgsz)[0]
+    # Convert
+    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+    img = np.ascontiguousarray(img)
+    img = torch.from_numpy(img).to(device)
+    img = img.half() if half else img.float()  # uint8 to fp16/32
+    img = img / 255.0  # 0 - 255 to 0.0 - 1.0
+    if len(img.shape) == 3:
+        img = img[None]
 
-    # scaleup = True
-    #if not scaleup:  # only scale down, do not scale up (for better test mAP)
-        #r = min(r, 1.0)
-
-    # Compute padding
-    ratio = r, r  # width, height ratios
-    new_unpad = int(round(src_w * r)), int(round(src_h* r))
-    dw, dh = dst_w - new_unpad[0],dst_h - new_unpad[1]  # wh padding
-    if auto:  # minimum rectangle
-        dw, dh = np.mod(dw, 32), np.mod(dh, 32)  # wh padding
-
-    dw /= 2  # divide padding into 2 sides
-    dh /= 2
-    #把原来图片的h和w反过来
-    if (src_w, src_h) != new_unpad:  # resize
-        img_src = cv2.resize(img_src, new_unpad, interpolation=cv2.INTER_LINEAR)
-    top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
-    left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
-    img_src = cv2.copyMakeBorder(img_src, top, bottom, left, right, cv2.BORDER_CONSTANT, value=pad_color)  # add border
-    return img_src, ratio, (dw, dh)
-
+    # Inference
+    pred = model(img)[0]
+    # NMS
+    pred = non_max_suppression(pred, opt_conf_thres, opt_iou_thres)
 
