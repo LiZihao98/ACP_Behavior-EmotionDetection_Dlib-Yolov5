@@ -145,7 +145,7 @@ def detFatigue(frame):
         
         Roll += 1
 
-        if Roll == 150:
+        if Roll == 10:
             perclos = (Rolleye/Roll) + (Rollmouth/Roll)*0.2
             if perclos > 0.2:  # eyes + mouth？
                 fatigue = True

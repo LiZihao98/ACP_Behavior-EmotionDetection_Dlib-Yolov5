@@ -19,7 +19,7 @@ from utils.torch_utils import select_device
 import numpy as np
 
 
-def predict(frame, weight, half=False, device='', imgsz=640, opt_conf_thres=0.65, opt_iou_thres=0.45):
+def predict(frame, weight, half=False, device='', imgsz=640, opt_conf_thres=0.25, opt_iou_thres=0.45):
     # Initialize
     device = select_device(device)
     half &= device.type != 'cpu'

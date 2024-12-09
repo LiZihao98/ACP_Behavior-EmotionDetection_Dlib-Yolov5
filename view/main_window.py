@@ -22,6 +22,18 @@ from drowsiness_detection.fatigue_detection import detFatigue
 from emotion_detection.emotion_detector import predict
 
 
+def showFrame(result, frame, labellist=[], offset=-5):
+    for label, prob, xyxy in result:
+        labellist.append(label)
+        text = label + str(prob)
+        left = int(xyxy[0])
+        top = int(xyxy[1])
+        right = int(xyxy[2])
+        bottom = int(xyxy[3])
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 1)
+        cv2.putText(frame, text, (left, top+offset), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)
+
+
 class FatigueStatusApp(QWidget):
 
     def __init__(self):
@@ -111,7 +123,6 @@ class FatigueStatusApp(QWidget):
 
         # dlib detection
         frame, ear, mar, fatigue = detFatigue(frame)
-        #self.fatigue_status.setText(str(fatigue))
         # 更新疲劳状态的文本
         self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
 
@@ -122,13 +133,13 @@ class FatigueStatusApp(QWidget):
 
         emotion_result = predict(frame, r'weight/best_emotion.pt')
         behavior_result = predict(frame, r'weight/best_behavior.pt')
+        showFrame(emotion_result, frame)
+        showFrame(behavior_result, frame, [],20)
 
         self.emotion_status.setText(str(emotion_result[0][0]) if emotion_result else "neutral")
         self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
 
-
-        # 将帧调整为 QLabel 的大小
-        frame = cv2.resize(frame, (640, 480))  # 调整为固定大小
+        frame = cv2.resize(frame, (640, 480))
         frame = cv2.flip(frame, 1)
         show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
@@ -139,4 +150,3 @@ class FatigueStatusApp(QWidget):
         if self.cap:
             self.cap.release()
         super().closeEvent(event)
-
