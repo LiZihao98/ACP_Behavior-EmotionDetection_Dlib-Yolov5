@@ -53,29 +53,22 @@ class FatigueStatusApp(QWidget):
         # 中部状态显示部分
         status_layout = QGridLayout()
         status_layout.addWidget(QLabel("Fatigue status: "), 0, 0)
-        self.fatigue_status = QLabel("Fatigued")
+        self.fatigue_status = QLabel("not Fatigued")
         status_layout.addWidget(self.fatigue_status, 0, 1)
 
         status_layout.addWidget(QLabel("Emotion: "), 1, 0)
-        self.emotion_status = QLabel("Angry / Happy / Terrified")
+        self.emotion_status = QLabel("neutral")
         status_layout.addWidget(self.emotion_status, 1, 1)
 
-        status_layout.addWidget(QLabel("Phone: "), 2, 0)
-        self.phone_status = QRadioButton("Yes")
-        status_layout.addWidget(self.phone_status, 2, 1)
-
-        status_layout.addWidget(QLabel("Drinking Water: "), 3, 0)
-        self.water_status = QRadioButton("No")
-        status_layout.addWidget(self.water_status, 3, 1)
-
-        status_layout.addWidget(QLabel("Smoking: "), 4, 0)
-        self.smoking_status = QRadioButton("Yes")
-        status_layout.addWidget(self.smoking_status, 4, 1)
+        status_layout.addWidget(QLabel("Behavior:"), 2, 0)
+        self.behavior_status = QLabel("no bad behavior")
+        status_layout.addWidget(self.behavior_status, 2, 1)
 
         main_layout.addLayout(status_layout)
 
         # 底部休息选择部分
-        rest_layout = QVBoxLayout()
+        self.rest_widget = QWidget()  # 使用 QWidget 容器来包含布局
+        rest_layout = QVBoxLayout(self.rest_widget)  # 将布局应用于 rest_widget
         rest_label = QLabel("You need to have a rest. Please choose a rest stop to take a break:")
         rest_layout.addWidget(rest_label)
 
@@ -85,7 +78,9 @@ class FatigueStatusApp(QWidget):
             rest_options.addButton(btn)
             rest_layout.addWidget(btn)
 
-        main_layout.addLayout(rest_layout)
+        # 初始隐藏休息部分
+        self.rest_widget.setVisible(False)
+        main_layout.addWidget(self.rest_widget)  # 将 self.rest_widget 添加到主布局
 
         # 设置主布局
         self.setLayout(main_layout)
@@ -116,9 +111,21 @@ class FatigueStatusApp(QWidget):
 
         # dlib detection
         frame, ear, mar, fatigue = detFatigue(frame)
-        self.fatigue_status.setText(str(fatigue))
+        #self.fatigue_status.setText(str(fatigue))
+        # 更新疲劳状态的文本
+        self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
+
+        if fatigue:
+            self.rest_widget.setVisible(True)
+        else:
+            self.rest_widget.setVisible(False)
+
         emotion_result = predict(frame, r'weight/best_emotion.pt')
         behavior_result = predict(frame, r'weight/best_behavior.pt')
+
+        self.emotion_status.setText(str(emotion_result[0][0]) if emotion_result else "neutral")
+        self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
+
 
         # 将帧调整为 QLabel 的大小
         frame = cv2.resize(frame, (640, 480))  # 调整为固定大小
@@ -132,3 +139,4 @@ class FatigueStatusApp(QWidget):
         if self.cap:
             self.cap.release()
         super().closeEvent(event)
+
