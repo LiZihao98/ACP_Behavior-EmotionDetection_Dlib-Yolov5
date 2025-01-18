@@ -14,7 +14,8 @@ Classes:
 
 import cv2
 from PySide2.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QGridLayout, QRadioButton, QButtonGroup
+    QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QGridLayout, QRadioButton, QButtonGroup, QMessageBox,
+    QTextEdit
 )
 from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtCore import QTimer, Qt
@@ -77,26 +78,43 @@ class FatigueStatusApp(QWidget):
         self.behavior_status = QLabel("no bad behavior")
         status_layout.addWidget(self.behavior_status, 2, 1)
 
+
         main_layout.addLayout(status_layout)
 
-        # 底部休息选择部分
-        self.rest_widget = QWidget()  # 使用 QWidget 容器来包含布局
-        rest_layout = QVBoxLayout(self.rest_widget)  # 将布局应用于 rest_widget
-        rest_label = QLabel("You need to have a rest. Please choose a rest stop to take a break:")
-        rest_layout.addWidget(rest_label)
 
-        rest_options = QButtonGroup(self)
-        for i, option in enumerate(["A: Rest Stop", "B: Rest Stop", "C: Rest Stop"], 1):
-            btn = QRadioButton(option)
-            rest_options.addButton(btn)
-            rest_layout.addWidget(btn)
-
-        # 初始隐藏休息部分
-        self.rest_widget.setVisible(False)
-        main_layout.addWidget(self.rest_widget)  # 将 self.rest_widget 添加到主布局
+        # 日志显示框
+        self.log_display = QTextEdit(self)
+        self.log_display.setReadOnly(True)
+        self.log_display.setMaximumHeight(200)  # 限制高度
+        main_layout.addWidget(self.log_display)
 
         # 设置主布局
         self.setLayout(main_layout)
+
+    def show_rest_popup(self, fatigue):
+        if fatigue:
+            # 创建弹窗
+            rest_dialog = QMessageBox(self)
+            rest_dialog.setWindowTitle("Rest Required")
+            rest_dialog.setText("You need to have a rest. Please choose a rest stop to take a break:")
+
+            # 自定义布局添加选项
+            rest_widget = QWidget()
+            rest_layout = QVBoxLayout(rest_widget)
+
+            rest_options = QButtonGroup(self)
+            for i, option in enumerate(["A: Rest Stop", "B: Rest Stop", "C: Rest Stop"], 1):
+                btn = QRadioButton(option)
+                rest_options.addButton(btn)
+                rest_layout.addWidget(btn)
+
+            # 将自定义内容添加到弹窗中
+            rest_dialog.layout().addWidget(rest_widget)
+
+            # 添加标准按钮（如确定按钮）
+            rest_dialog.setStandardButtons(QMessageBox.Ok)
+            rest_dialog.exec_()
+
 
     def start_camera(self):
         """启动摄像头并显示视频"""
@@ -132,9 +150,9 @@ class FatigueStatusApp(QWidget):
         self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
 
         if fatigue:
-            self.rest_widget.setVisible(True)
+            self.show_rest_popup(fatigue)
         else:
-            self.rest_widget.setVisible(False)
+            self.show_rest_popup(fatigue)
 
         emotion_result = predict(frame, r'weight/best_emotion.pt')
         behavior_result = predict(frame, r'weight/best_behavior.pt')
