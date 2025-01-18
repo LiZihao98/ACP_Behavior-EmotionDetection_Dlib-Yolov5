@@ -21,6 +21,7 @@ from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtCore import QTimer, Qt
 from drowsiness_detection.fatigue_detection import detFatigue
 from emotion_detection.emotion_detector import predict
+from driver_warning import driver_warning
 
 
 def showFrame(result, frame, labellist=[], offset=-5):
@@ -91,12 +92,12 @@ class FatigueStatusApp(QWidget):
         # 设置主布局
         self.setLayout(main_layout)
 
-    def show_rest_popup(self, fatigue):
-        if fatigue:
+    def show_rest_popup(self, warning):
+        if warning[1]:
             # 创建弹窗
             rest_dialog = QMessageBox(self)
             rest_dialog.setWindowTitle("Rest Required")
-            rest_dialog.setText("You need to have a rest. Please choose a rest stop to take a break:")
+            rest_dialog.setText(warning[0])
 
             # 自定义布局添加选项
             rest_widget = QWidget()
@@ -148,14 +149,21 @@ class FatigueStatusApp(QWidget):
         frame, ear, mar, fatigue = detFatigue(frame, self.cap)
         # 更新疲劳状态的文本
         self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
-
-        if fatigue:
-            self.show_rest_popup(fatigue)
-        else:
-            self.show_rest_popup(fatigue)
+        
 
         emotion_result = predict(frame, r'weight/best_emotion.pt')
         behavior_result = predict(frame, r'weight/best_behavior.pt')
+        emo = emotion_result[0][0]
+        behav = emotion_result[0][0]
+        
+        warning = driver_warning(fatigue=fatigue, behav=behav, emotion=emo)
+
+        if warning[1]:
+            self.show_rest_popup(warning=warning)
+        else:
+            self.show_rest_popup(warning=warning)
+
+
         showFrame(emotion_result, frame)
         showFrame(behavior_result, frame, [], 20)
 

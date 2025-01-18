@@ -1,7 +1,7 @@
 from datetime import datetime
 def driver_warning(fatigue: bool, behav: str, emotion: str) -> str:
 
-    negtive_emo = []
+    negtive_emo = ["angry"]
     positive_emo = []
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
