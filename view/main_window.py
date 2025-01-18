@@ -96,14 +96,13 @@ class FatigueStatusApp(QWidget):
         import datetime
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         status = "Fatigued" if fatigue else "Not Fatigued"
-        if fatigue == True:
-            self.log_display.insertPlainText(f"[{current_time}] Fatigue Status: {status}\n")
+        # if fatigue == True:
+        #     self.log_display.insertPlainText(f"[{current_time}] Fatigue Status: {status}\n")
         result = driver_warning(fatigue, behav, emotion)
         print(result[0])
         print(result[1])
         if result[0] != "":
-            print("jjjjjjj")
-            self.log_display.insertPlainText(result[0])
+            self.log_display.insertPlainText(f"[{current_time}]{result[0]}\n")
         self.log_display.verticalScrollBar().setValue(self.log_display.verticalScrollBar().maximum())
 
     def show_rest_popup(self, warning):
@@ -183,8 +182,7 @@ class FatigueStatusApp(QWidget):
 
         self.emotion_status.setText(str(emotion_result[0][0]) if emotion_result else "neutral")
         self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
-        if behavior_result is not None and emotion_result is not None:
-            self.update_log(fatigue, behavior_result[0][0], emotion_result[0][0])
+        self.update_log(fatigue=fatigue, behav=behav, emotion=emo)
 
         frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_LINEAR)
         frame = cv2.flip(frame, 1)

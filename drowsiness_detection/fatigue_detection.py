@@ -169,4 +169,9 @@ def detFatigue(frame, cap):
         else:
             pass
 
+        if fatigue_Mouth | fatigue_Eyes | fatigue_Perclose:
+            Rolleye=0
+            EYE_COUNTER=0
+            MOUTH_COUNTER=0
+
     return frame, ear, mar, (fatigue_Mouth | fatigue_Eyes | fatigue_Perclose)
