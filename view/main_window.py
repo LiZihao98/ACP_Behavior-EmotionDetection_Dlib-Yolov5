@@ -82,15 +82,22 @@ class FatigueStatusApp(QWidget):
 
         main_layout.addLayout(status_layout)
 
-
-        # 日志显示框
+        # 在状态布局右侧添加日志框
+        # 在状态布局右侧添加日志框，并与状态部分高度一致
         self.log_display = QTextEdit(self)
         self.log_display.setReadOnly(True)
-        self.log_display.setMaximumHeight(200)  # 限制高度
-        main_layout.addWidget(self.log_display)
+        status_layout.addWidget(self.log_display, 0, 2, 3, 1)
 
         # 设置主布局
         self.setLayout(main_layout)
+
+    def update_log(self, fatigue):
+        """更新日志显示框"""
+        import datetime
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        status = "Fatigued" if fatigue else "Not Fatigued"
+        self.log_display.insertPlainText(f"[{current_time}] Fatigue Status: {status}\n")
+        self.log_display.verticalScrollBar().setValue(self.log_display.verticalScrollBar().maximum())
 
     def show_rest_popup(self, warning):
         if warning[1]:
@@ -155,7 +162,7 @@ class FatigueStatusApp(QWidget):
         behavior_result = predict(frame, r'weight/best_behavior.pt')
         emo = emotion_result[0][0]
         behav = emotion_result[0][0]
-        
+
         warning = driver_warning(fatigue=fatigue, behav=behav, emotion=emo)
 
         if warning[1]:
