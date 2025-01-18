@@ -134,9 +134,10 @@ def detFatigue(frame, cap):
         else:
             MOUTH_COUNTER = 0
 
-        print("EYE_COUNTER:" + str(EYE_COUNTER))
-        print("MOUTH_COUNTER:" + str(MOUTH_COUNTER))
-        print("Rolleye:" + str(Rolleye))
+        # print("EYE_COUNTER:" + str(EYE_COUNTER))
+        # print("MOUTH_COUNTER:" + str(MOUTH_COUNTER))
+        # print("Rolleye:" + str(Rolleye))
+
         # Fatigue detected
         # Yawn detected
         if MOUTH_COUNTER > 3:
