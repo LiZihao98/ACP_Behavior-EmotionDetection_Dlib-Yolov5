@@ -12,15 +12,27 @@ Classes:
     MainWindow: Creates the main application window and initializes all UI components.
 """
 
-import sys
 import cv2
 from PySide2.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QGridLayout, QRadioButton, QButtonGroup
+    QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QGridLayout, QRadioButton, QButtonGroup, QMessageBox,
+    QTextEdit
 )
 from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtCore import QTimer, Qt
-from drowsiness_detection import fatigue_detection
 from drowsiness_detection.fatigue_detection import detFatigue
+from emotion_detection.emotion_detector import predict
+
+
+def showFrame(result, frame, labellist=[], offset=-5):
+    for label, prob, xyxy in result:
+        labellist.append(label)
+        text = label + str(prob)
+        left = int(xyxy[0])
+        top = int(xyxy[1])
+        right = int(xyxy[2])
+        bottom = int(xyxy[3])
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 1)
+        cv2.putText(frame, text, (left, top+offset), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)
 
 
 class FatigueStatusApp(QWidget):
@@ -37,14 +49,15 @@ class FatigueStatusApp(QWidget):
         main_layout = QVBoxLayout()
 
         # 顶部摄像头启动部分
-        camera_layout = QHBoxLayout()
-        camera_label = QLabel("Camera:")
-        self.start_button = QPushButton("Start Camera")
-        self.start_button.clicked.connect(self.start_camera)
-
-        camera_layout.addWidget(camera_label)
-        camera_layout.addWidget(self.start_button)
-        main_layout.addLayout(camera_layout)
+        # camera_layout = QHBoxLayout()
+        # camera_label = QLabel("Camera:")
+        # self.start_button = QPushButton("Start Camera")
+        # self.start_button.clicked.connect(self.start_camera)
+        #
+        # camera_layout.addWidget(camera_label)
+        # camera_layout.addWidget(self.start_button)
+        # main_layout.addLayout(camera_layout)
+        self.start_camera()
 
         # 视频显示区域
         self.video_label = QLabel(self)
@@ -54,42 +67,54 @@ class FatigueStatusApp(QWidget):
         # 中部状态显示部分
         status_layout = QGridLayout()
         status_layout.addWidget(QLabel("Fatigue status: "), 0, 0)
-        self.fatigue_status = QLabel("Fatigued")
+        self.fatigue_status = QLabel("not Fatigued")
         status_layout.addWidget(self.fatigue_status, 0, 1)
 
         status_layout.addWidget(QLabel("Emotion: "), 1, 0)
-        self.emotion_status = QLabel("Angry / Happy / Terrified")
+        self.emotion_status = QLabel("neutral")
         status_layout.addWidget(self.emotion_status, 1, 1)
 
-        status_layout.addWidget(QLabel("Phone: "), 2, 0)
-        self.phone_status = QRadioButton("Yes")
-        status_layout.addWidget(self.phone_status, 2, 1)
+        status_layout.addWidget(QLabel("Behavior:"), 2, 0)
+        self.behavior_status = QLabel("no bad behavior")
+        status_layout.addWidget(self.behavior_status, 2, 1)
 
-        status_layout.addWidget(QLabel("Drinking Water: "), 3, 0)
-        self.water_status = QRadioButton("No")
-        status_layout.addWidget(self.water_status, 3, 1)
-
-        status_layout.addWidget(QLabel("Smoking: "), 4, 0)
-        self.smoking_status = QRadioButton("Yes")
-        status_layout.addWidget(self.smoking_status, 4, 1)
 
         main_layout.addLayout(status_layout)
 
-        # 底部休息选择部分
-        rest_layout = QVBoxLayout()
-        rest_label = QLabel("You need to have a rest. Please choose a rest stop to take a break:")
-        rest_layout.addWidget(rest_label)
 
-        rest_options = QButtonGroup(self)
-        for i, option in enumerate(["A: Rest Stop", "B: Rest Stop", "C: Rest Stop"], 1):
-            btn = QRadioButton(option)
-            rest_options.addButton(btn)
-            rest_layout.addWidget(btn)
-
-        main_layout.addLayout(rest_layout)
+        # 日志显示框
+        self.log_display = QTextEdit(self)
+        self.log_display.setReadOnly(True)
+        self.log_display.setMaximumHeight(200)  # 限制高度
+        main_layout.addWidget(self.log_display)
 
         # 设置主布局
         self.setLayout(main_layout)
+
+    def show_rest_popup(self, fatigue):
+        if fatigue:
+            # 创建弹窗
+            rest_dialog = QMessageBox(self)
+            rest_dialog.setWindowTitle("Rest Required")
+            rest_dialog.setText("You need to have a rest. Please choose a rest stop to take a break:")
+
+            # 自定义布局添加选项
+            rest_widget = QWidget()
+            rest_layout = QVBoxLayout(rest_widget)
+
+            rest_options = QButtonGroup(self)
+            for i, option in enumerate(["A: Rest Stop", "B: Rest Stop", "C: Rest Stop"], 1):
+                btn = QRadioButton(option)
+                rest_options.addButton(btn)
+                rest_layout.addWidget(btn)
+
+            # 将自定义内容添加到弹窗中
+            rest_dialog.layout().addWidget(rest_widget)
+
+            # 添加标准按钮（如确定按钮）
+            rest_dialog.setStandardButtons(QMessageBox.Ok)
+            rest_dialog.exec_()
+
 
     def start_camera(self):
         """启动摄像头并显示视频"""
@@ -98,31 +123,46 @@ class FatigueStatusApp(QWidget):
 
         # 默认使用索引为 0 的摄像头
         self.cap = cv2.VideoCapture(0)
-
+        self.cap.set(cv2.CAP_PROP_FPS, 30)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 64)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 48)
         # 检查摄像头是否成功打开
         if not self.cap.isOpened():
             print("Failed to open the camera.")
             self.fatigue_status.setText("Failed to initialize the camera.")
             return
 
-        # 启动视频帧更新定时器
-        self.timer.start(10)
+        # 启动视频帧更新定时器 10ms内启动视频
+        self.timer.start(1000)
         self.timer.timeout.connect(self.update_frame)
 
     def update_frame(self):
         """更新视频帧"""
         success, frame = self.cap.read()
+        # fps = self.cap.get(cv2.CAP_PROP_FPS)
+        # print("fps:", fps)
         if not success:
             return
 
         # dlib detection
-        frame, ear, mar,fatigue = detFatigue(frame)
-        self.fatigue_status.setText(str(fatigue))
+        frame, ear, mar, fatigue = detFatigue(frame, self.cap)
+        # 更新疲劳状态的文本
+        self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
 
-        # print(fatigue_detection.EYE_CLOSED_COUNTER)
+        if fatigue:
+            self.show_rest_popup(fatigue)
+        else:
+            self.show_rest_popup(fatigue)
 
-        # 将帧调整为 QLabel 的大小
-        frame = cv2.resize(frame, (640, 480))  # 调整为固定大小
+        emotion_result = predict(frame, r'weight/best_emotion.pt')
+        behavior_result = predict(frame, r'weight/best_behavior.pt')
+        showFrame(emotion_result, frame)
+        showFrame(behavior_result, frame, [], 20)
+
+        self.emotion_status.setText(str(emotion_result[0][0]) if emotion_result else "neutral")
+        self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
+
+        frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_LINEAR)
         frame = cv2.flip(frame, 1)
         show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
@@ -133,10 +173,3 @@ class FatigueStatusApp(QWidget):
         if self.cap:
             self.cap.release()
         super().closeEvent(event)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = FatigueStatusApp()
-    window.show()
-    sys.exit(app.exec_())
