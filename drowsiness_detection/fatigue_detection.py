@@ -26,11 +26,9 @@ from imutils import face_utils
 FACIAL_LANDMARK_PREDICTOR = "weight/shape_predictor_68_face_landmarks.dat"
 # Eyes
 THRESHOLD_EAR = 0.2
-CONSEC_EFRAMES = 2
 
 # Mouth
-THRESHOLD_MAR = 0.5 
-CONSEC_MFRAMES = 3
+THRESHOLD_MAR = 0.5
 
 EYE_COUNTER = 0             # counters for eye blink in every consecutive frame
 EYE_TOTAL = 0               # total number of eye closed
@@ -44,7 +42,9 @@ Roll = 0                    # Total frames inside loop
 Rolleye = 0                 # number of closing eyes inside loop
 Rollmouth = 0               # number of yawns inside loop
 
-fatigue = False
+fatigue_Mouth = False
+fatigue_Eyes = False
+fatigue_Perclose = False
 
 faceDetector = dlib.get_frontal_face_detector()
 landmarkFinder = dlib.shape_predictor(FACIAL_LANDMARK_PREDICTOR)
@@ -75,9 +75,11 @@ def mouth_aspect_ratio(mouth):
     return mar
 
 
-def detFatigue(frame):
-    global THRESHOLD_EAR, CONSEC_EFRAMES, THRESHOLD_MAR, CONSEC_MFRAMES, EYE_COUNTER, EYE_TOTAL, MOUTH_COUNTER, \
-        MOUTH_TOTAL, Roll, Rolleye, Rollmouth, fatigue
+def detFatigue(frame, cap):
+    # fps = cap.get(cv2.CAP_PROP_FPS)
+    # print("fps:", fps)
+    global THRESHOLD_EAR, THRESHOLD_MAR, EYE_COUNTER, EYE_TOTAL, MOUTH_COUNTER, \
+        MOUTH_TOTAL, Roll, Rolleye, Rollmouth, fatigue_Mouth, fatigue_Eyes, fatigue_Perclose
 
     # resize to the image and convert it to grayscale.
     grayImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -118,43 +120,52 @@ def detFatigue(frame):
         cv2.line(frame, tuple(faceLandmarks[51]), tuple(faceLandmarks[57]), (0, 255, 0), 1)
         cv2.line(frame, tuple(faceLandmarks[48]), tuple(faceLandmarks[54]), (0, 255, 0), 1)
 
-        # if ear < MINIMUM_EAR:
-        #     EYE_CLOSED_COUNTER += 1
-        # # else:
-        # #     EYE_CLOSED_COUNTER = 0
-        # #     FATIGUE = False
-        # # if EYE_CLOSED_COUNTER >= MAXIMUM_FRAME_COUNT:
-        # #     FATIGUE = True
-
+        # Eyes closing detected
         if ear < THRESHOLD_EAR:
+            # Rolleye records the number of times the user blinks with their eyes closed within one minute
             EYE_COUNTER += 1
             Rolleye += 1
         else:
-
-            if EYE_COUNTER >= CONSEC_EFRAMES:
-                EYE_TOTAL += 1
-                EYE_COUNTER = 0
-        
+            # When there are no consecutive frames with eyes closed, EYE_COUNTER will not be cleared to 0,
+            EYE_COUNTER = 0
+        # Mouth opening detected
         if mar > THRESHOLD_MAR:
             MOUTH_COUNTER += 1
-            Rollmouth += 1
         else:
-            if MOUTH_COUNTER >= CONSEC_MFRAMES:
-                MOUTH_TOTAL += 1
-                MOUTH_COUNTER = 0
-        
-        Roll += 1
+            MOUTH_COUNTER = 0
 
-        if Roll == 10:
-            perclos = (Rolleye/Roll) + (Rollmouth/Roll)*0.2
-            if perclos > 0.2:  # eyes + mouth？
-                fatigue = True
-            else:
-                fatigue = False
+        print("EYE_COUNTER:" + str(EYE_COUNTER))
+        print("MOUTH_COUNTER:" + str(MOUTH_COUNTER))
+        print("Rolleye:" + str(Rolleye))
+        # Fatigue detected
+        # Yawn detected
+        if MOUTH_COUNTER > 3:
+            fatigue_Mouth = True
+        else:
+            fatigue_Mouth = False
+        # When the continuous closing time lasts for 2 seconds, it is considered that the user may be fatigue.
+        if EYE_COUNTER > 2:
+            fatigue_Eyes = True
+        else:
+            fatigue_Eyes = False
+
+        Roll += 1
+        if Rolleye > 12:
+            fatigue_Perclose = True
+            Rolleye = 0
             Roll = 0
-            Rollmouth = 0
+        print(Roll)
+        if Roll == 60:
+            perclos = Rolleye/Roll
+            # print(perclos)
+            if perclos > 0.2:
+                fatigue_Perclose = True
+            else:
+                fatigue_Perclose = False
+            Roll = 0
             Rolleye = 0
             # set labels
         else:
             pass
-    return frame, ear, mar, fatigue
+
+    return frame, ear, mar, (fatigue_Mouth | fatigue_Eyes | fatigue_Perclose)

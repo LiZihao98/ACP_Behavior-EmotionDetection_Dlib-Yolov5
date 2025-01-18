@@ -104,25 +104,29 @@ class FatigueStatusApp(QWidget):
 
         # 默认使用索引为 0 的摄像头
         self.cap = cv2.VideoCapture(0)
-
+        self.cap.set(cv2.CAP_PROP_FPS, 30)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 64)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 48)
         # 检查摄像头是否成功打开
         if not self.cap.isOpened():
             print("Failed to open the camera.")
             self.fatigue_status.setText("Failed to initialize the camera.")
             return
 
-        # 启动视频帧更新定时器
-        self.timer.start(10)
+        # 启动视频帧更新定时器 10ms内启动视频
+        self.timer.start(1000)
         self.timer.timeout.connect(self.update_frame)
 
     def update_frame(self):
         """更新视频帧"""
         success, frame = self.cap.read()
+        # fps = self.cap.get(cv2.CAP_PROP_FPS)
+        # print("fps:", fps)
         if not success:
             return
 
         # dlib detection
-        frame, ear, mar, fatigue = detFatigue(frame)
+        frame, ear, mar, fatigue = detFatigue(frame, self.cap)
         # 更新疲劳状态的文本
         self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
 
@@ -134,12 +138,12 @@ class FatigueStatusApp(QWidget):
         emotion_result = predict(frame, r'weight/best_emotion.pt')
         behavior_result = predict(frame, r'weight/best_behavior.pt')
         showFrame(emotion_result, frame)
-        showFrame(behavior_result, frame, [],20)
+        showFrame(behavior_result, frame, [], 20)
 
         self.emotion_status.setText(str(emotion_result[0][0]) if emotion_result else "neutral")
         self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
 
-        frame = cv2.resize(frame, (640, 480))
+        frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_LINEAR)
         frame = cv2.flip(frame, 1)
         show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
