@@ -48,14 +48,15 @@ class FatigueStatusApp(QWidget):
         main_layout = QVBoxLayout()
 
         # 顶部摄像头启动部分
-        camera_layout = QHBoxLayout()
-        camera_label = QLabel("Camera:")
-        self.start_button = QPushButton("Start Camera")
-        self.start_button.clicked.connect(self.start_camera)
-
-        camera_layout.addWidget(camera_label)
-        camera_layout.addWidget(self.start_button)
-        main_layout.addLayout(camera_layout)
+        # camera_layout = QHBoxLayout()
+        # camera_label = QLabel("Camera:")
+        # self.start_button = QPushButton("Start Camera")
+        # self.start_button.clicked.connect(self.start_camera)
+        #
+        # camera_layout.addWidget(camera_label)
+        # camera_layout.addWidget(self.start_button)
+        # main_layout.addLayout(camera_layout)
+        self.start_camera()
 
         # 视频显示区域
         self.video_label = QLabel(self)
