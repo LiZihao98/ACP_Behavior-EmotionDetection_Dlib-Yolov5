@@ -91,12 +91,19 @@ class FatigueStatusApp(QWidget):
         # 设置主布局
         self.setLayout(main_layout)
 
-    def update_log(self, fatigue):
+    def update_log(self, fatigue, behav, emotion):
         """更新日志显示框"""
         import datetime
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         status = "Fatigued" if fatigue else "Not Fatigued"
-        self.log_display.insertPlainText(f"[{current_time}] Fatigue Status: {status}\n")
+        if fatigue == True:
+            self.log_display.insertPlainText(f"[{current_time}] Fatigue Status: {status}\n")
+        result = driver_warning(fatigue, behav, emotion)
+        print(result[0])
+        print(result[1])
+        if result[0] != "":
+            print("jjjjjjj")
+            self.log_display.insertPlainText(result[0])
         self.log_display.verticalScrollBar().setValue(self.log_display.verticalScrollBar().maximum())
 
     def show_rest_popup(self, warning):
@@ -156,12 +163,12 @@ class FatigueStatusApp(QWidget):
         frame, ear, mar, fatigue = detFatigue(frame, self.cap)
         # 更新疲劳状态的文本
         self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
-        
+
 
         emotion_result = predict(frame, r'weight/best_emotion.pt')
         behavior_result = predict(frame, r'weight/best_behavior.pt')
-        emo = emotion_result[0][0]
-        behav = emotion_result[0][0]
+        emo = str(emotion_result[0][0]) if emotion_result else "neutral"
+        behav = str(behavior_result[0][0]) if behavior_result else "no bad behavior"
 
         warning = driver_warning(fatigue=fatigue, behav=behav, emotion=emo)
 
@@ -176,6 +183,8 @@ class FatigueStatusApp(QWidget):
 
         self.emotion_status.setText(str(emotion_result[0][0]) if emotion_result else "neutral")
         self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
+        if behavior_result is not None and emotion_result is not None:
+            self.update_log(fatigue, behavior_result[0][0], emotion_result[0][0])
 
         frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_LINEAR)
         frame = cv2.flip(frame, 1)
