@@ -60,8 +60,9 @@ def predict(frame, weight, half=False, device='', imgsz=640, opt_conf_thres=0.25
             # Write results
             for *xyxy, conf, cls in reversed(det):
                 label = f'{names[int(cls)]}'
-                prob = round(float(conf) * 100, 2)  # round 2
-                ret_i = [label, prob, xyxy]
-                ret.append(ret_i)
+                if label != "face":
+                    prob = round(float(conf) * 100, 2)  # round 2
+                    ret_i = [label, prob, xyxy]
+                    ret.append(ret_i)
 
     return ret

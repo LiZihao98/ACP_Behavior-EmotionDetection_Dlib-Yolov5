@@ -13,6 +13,7 @@ Classes:
 """
 
 import cv2
+import time
 from PySide2.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QGridLayout, QRadioButton, QButtonGroup, QMessageBox,
     QTextEdit
@@ -147,12 +148,13 @@ class FatigueStatusApp(QWidget):
             return
 
         # 启动视频帧更新定时器 10ms内启动视频
-        self.timer.start(1000)
+        self.timer.start(20)
         self.timer.timeout.connect(self.update_frame)
 
     def update_frame(self):
         """更新视频帧"""
         success, frame = self.cap.read()
+        tstart = time.time()
         # fps = self.cap.get(cv2.CAP_PROP_FPS)
         # print("fps:", fps)
         if not success:
@@ -188,6 +190,12 @@ class FatigueStatusApp(QWidget):
         frame = cv2.flip(frame, 1)
         show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+        tend = time.time()
+        # 计算fps
+        fps = 1 / (tend - tstart)
+        fps = "%.2f fps" % fps
+        # 在图片的左上角标出Fps
+        cv2.putText(frame, fps, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)
         self.video_label.setPixmap(QPixmap.fromImage(showImage))
 
     def closeEvent(self, event):
