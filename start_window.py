@@ -2,7 +2,7 @@ import sys
 from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
 from PySide2.QtGui import QPixmap
 from PySide2.QtCore import Qt
-from view.main_window import FatigueStatusApp
+from main_window import FatigueStatusApp
 
 
 def exitApp():

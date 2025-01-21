@@ -19,8 +19,8 @@ from PySide2.QtWidgets import (
 )
 from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtCore import QTimer, Qt
-from drowsiness_detection.fatigue_detection import detFatigue
-from emotion_detection.emotion_detector import predict
+from fatigue_detection import detFatigue
+from emotion_detector import predict
 from driver_warning import driver_warning
 
 
