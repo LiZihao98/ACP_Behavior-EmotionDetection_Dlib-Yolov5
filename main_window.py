@@ -23,6 +23,13 @@ from PySide2.QtCore import QTimer, Qt
 from fatigue_detection import detFatigue
 from emotion_detector import predict
 from driver_warning import driver_warning
+from models.experimental import attempt_load
+from utils.torch_utils import select_device
+
+device = select_device('')
+half = device.type != 'cpu'
+model_emo = attempt_load(r'weight/best_emotion.pt', map_location=device)
+model_beh = attempt_load(r'weight/best_behavior.pt', map_location=device)
 
 
 def showFrame(result, frame, labellist=[], offset=-5):
@@ -46,19 +53,9 @@ class FatigueStatusApp(QWidget):
 
         self.cap = None  # 摄像头对象初始化
         self.timer = QTimer(self)
-
         # 主布局
         main_layout = QVBoxLayout()
 
-        # 顶部摄像头启动部分
-        # camera_layout = QHBoxLayout()
-        # camera_label = QLabel("Camera:")
-        # self.start_button = QPushButton("Start Camera")
-        # self.start_button.clicked.connect(self.start_camera)
-        #
-        # camera_layout.addWidget(camera_label)
-        # camera_layout.addWidget(self.start_button)
-        # main_layout.addLayout(camera_layout)
         self.start_camera()
 
         # 视频显示区域
@@ -165,9 +162,8 @@ class FatigueStatusApp(QWidget):
         # 更新疲劳状态的文本
         self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
 
-
-        emotion_result = predict(frame, r'weight/best_emotion.pt')
-        behavior_result = predict(frame, r'weight/best_behavior.pt')
+        emotion_result = predict(frame, model_emo)
+        behavior_result = predict(frame, model_beh)
         emo = str(emotion_result[0][0]) if emotion_result else "neutral"
         behav = str(behavior_result[0][0]) if behavior_result else "no bad behavior"
 
@@ -177,7 +173,6 @@ class FatigueStatusApp(QWidget):
             self.show_rest_popup(warning=warning)
         else:
             self.show_rest_popup(warning=warning)
-
 
         showFrame(emotion_result, frame)
         showFrame(behavior_result, frame, [], 20)
@@ -196,6 +191,7 @@ class FatigueStatusApp(QWidget):
         fps = "%.2f fps" % fps
         # 在图片的左上角标出Fps
         cv2.putText(frame, fps, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)
+        print(f"fps:{fps}")
         self.video_label.setPixmap(QPixmap.fromImage(showImage))
 
     def closeEvent(self, event):
