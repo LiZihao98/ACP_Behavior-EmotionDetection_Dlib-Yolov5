@@ -19,10 +19,10 @@ from utils.torch_utils import select_device
 import numpy as np
 
 
-def predict(frame, weight, half=False, device='', imgsz=640, opt_conf_thres=0.25, opt_iou_thres=0.45):
+def predict(frame, weight, half=False, device='0', imgsz=640, opt_conf_thres=0.25, opt_iou_thres=0.45):
     # Initialize
     device = select_device(device)
-    half &= device.type != 'cpu'
+    half = device.type != 'cpu'
     # Load model
     model = attempt_load(weight, map_location=device)
     stride = int(model.stride.max())
@@ -30,12 +30,12 @@ def predict(frame, weight, half=False, device='', imgsz=640, opt_conf_thres=0.25
     if half:
         model.half()  # to FP16
     # model stride
-    imgsz = check_img_size(imgsz, s=stride)  # check image size
+    imgsz = check_img_size(imgsz, s=model.stride.max())  # check image size
     # init img
     img = torch.zeros((1, 3, imgsz, imgsz), device=device)
     # warm up
-    if device.type != 'cpu':
-        model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.parameters())))  # run once
+    # if device.type != 'cpu':
+    #     model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.parameters())))  # run once
 
     img = letterbox(frame, new_shape=imgsz)[0]
     # Convert
