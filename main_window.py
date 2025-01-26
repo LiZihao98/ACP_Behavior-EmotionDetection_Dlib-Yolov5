@@ -65,7 +65,9 @@ class FatigueStatusApp(QWidget):
 
         # 中部状态显示部分
         status_layout = QGridLayout()
-        status_layout.addWidget(QLabel("Fatigue status: "), 0, 0)
+        fatigue_label = QLabel('Fatigue status ℹ️:')
+        fatigue_label.setToolTip("MAR: Mouth Aspect Ratio\nEAR: Eye Aspect Ratio\nPERCLOS: Percentage of Eye Closure")
+        status_layout.addWidget(fatigue_label, 0, 0)
         self.fatigue_status = QLabel("not Fatigued")
         status_layout.addWidget(self.fatigue_status, 0, 1)
 
