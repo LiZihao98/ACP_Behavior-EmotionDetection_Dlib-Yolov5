@@ -151,12 +151,12 @@ def detFatigue(frame, cap):
             fatigue_Eyes = False
 
         Roll += 1
-        if Rolleye > 12:
+        if Rolleye > 30:
             fatigue_Perclose = True
             Rolleye = 0
             Roll = 0
         print(Roll)
-        if Roll == 60:
+        if Roll == 150:
             perclos = Rolleye/Roll
             # print(perclos)
             if perclos > 0.2:
