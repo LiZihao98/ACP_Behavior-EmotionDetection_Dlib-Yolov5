@@ -1,8 +1,7 @@
 from datetime import datetime
 def driver_warning(fatigue: bool, behav: str, emotion: str) -> str:
 
-    negtive_emo = ["angry"]
-    positive_emo = []
+    negtive_emo = ["angry", 'disgust', 'fear','sad','surprise']
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     warning = ["", False]
@@ -15,14 +14,14 @@ def driver_warning(fatigue: bool, behav: str, emotion: str) -> str:
         return warning
 
     # Scenario 2: Fatigue + risky behavior + positive (or stable) emotion
-    if fatigue and behav != "no bad behaviours" and emotion in positive_emo:
+    if fatigue and behav != "no bad behaviours" and emotion not in negtive_emo:
         warning[0] = f"[{current_time}][Heads Up] You're tired and doing something risky. Stay focused and stop the risky action."
         warning[1] = True
 
         return warning
 
     # Scenario 3: Not fatigued + risky behavior + positive emotion
-    if not fatigue and behav != "no bad behaviours" and emotion in positive_emo:
+    if not fatigue and behav != "no bad behaviours" and emotion not in negtive_emo:
         warning[0] = f"[{current_time}][Watch Out]  You're doing something risky. Don't get too excited and lose focus."
         warning[1] = False
 
