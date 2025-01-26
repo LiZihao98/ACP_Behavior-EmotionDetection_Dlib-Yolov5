@@ -51,6 +51,27 @@ class FatigueStatusApp(QWidget):
         self.setWindowTitle("Fatigue Status Monitor")
         self.setGeometry(100, 100, 800, 600)
 
+        self.setStyleSheet("""
+        QLabel {
+            font-size: 24px;  /* 设置所有 QLabel 的字体大小 */
+            font-weight: bold;  /* 加粗字体 */
+        }
+        QPushButton {
+            font-size: 22px;  /* 按钮字体大小 */
+            font-weight: bold;
+            padding: 10px;  /* 增加按钮的内边距 */
+        }
+        QTextEdit {
+            font-size: 20px;  /* 日志框字体大小 */
+        }
+        QRadioButton {
+            font-size: 22px;  /* 单选按钮字体大小 */
+        }
+        QMessageBox {
+            font-size: 24px;  /* 提示框字体大小 */
+        }
+    """)
+
         self.cap = None  # 摄像头对象初始化
         self.timer = QTimer(self)
         # 主布局
