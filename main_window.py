@@ -177,9 +177,20 @@ class FatigueStatusApp(QWidget):
         showFrame(emotion_result, frame)
         showFrame(behavior_result, frame, [], 20)
 
-        self.emotion_status.setText(str(emotion_result[0][0]) if emotion_result else "neutral")
-        self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
-        self.update_log(fatigue=fatigue, behav=behav, emotion=emo)
+        # 更新界面上的情绪状态
+        self.emotion_status.setText(emo)
+        if emo != "neutral":
+            self.emotion_status.setStyleSheet("color: red; font-weight: bold;")
+        else:
+            self.emotion_status.setStyleSheet("color: black;")
+
+        # 更新界面上的行为状态
+        self.behavior_status.setText(behav)
+        if behav != "no bad behavior":
+            self.behavior_status.setStyleSheet("color: red; font-weight: bold;")
+        else:
+            self.behavior_status.setStyleSheet("color: black;")
+            self.update_log(fatigue=fatigue, behav=behav, emotion=emo)
 
         frame = cv2.resize(frame, (1920,1080), interpolation=cv2.INTER_LINEAR)
         frame = cv2.flip(frame, 1)
