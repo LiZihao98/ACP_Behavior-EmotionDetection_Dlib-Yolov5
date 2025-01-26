@@ -18,6 +18,21 @@ class MainWindow(QWidget):
     def initUI(self):
         self.setWindowTitle("safedrive_App")
         self.setGeometry(300, 300, 900, 900)
+        # 设置字体加粗并增大
+        self.setStyleSheet("""
+            QLabel {
+                font-size: 28px;  /* 增大字体 */
+                font-weight: bold;  /* 加粗 */
+            }
+            QPushButton {
+                font-size: 26px;  /* 按钮字体大小 */
+                font-weight: bold;
+                padding: 15px;  /* 增加按钮的内边距 */
+            }
+            QWidget {
+                font-family: Arial, sans-serif;  /* 设置字体 */
+            }
+        """)
 
         pixmap = QPixmap("safedrive_logo.webp")
         resized_pixmap = pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)

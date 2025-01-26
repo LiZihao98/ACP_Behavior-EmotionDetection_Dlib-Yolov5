@@ -1,55 +1,55 @@
 from datetime import datetime
 def driver_warning(fatigue: bool, behav: str, emotion: str) -> str:
 
-    negtive_emo = ["angry"]
-    positive_emo = []
+    negtive_emo = ['angry', 'disgust', 'fear',  'surprise']
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    warning = ["", False]
+    warning = ["", False, ""]
 
     # Scenario 1: Fatigue + risky behavior + negative emotion
     if fatigue and behav != "no bad behaviours" and emotion in negtive_emo:
-        warning[0] = f"[{current_time}][High Alert] You're tired, doing something risky, and in a bad moode. Please pull over and rest ASAP!"
+        warning[0] = f"[High Alert] You're tired, doing something risky, and in a bad moode. Please pull over and rest ASAP!"
         warning[1] = True
-
+        warning[2] = f"[High Alert] Fatigue:{fatigue}, Behaviour:{behav}, Emotion:{emotion}"
         return warning
 
     # Scenario 2: Fatigue + risky behavior + positive (or stable) emotion
-    if fatigue and behav != "no bad behaviours" and emotion in positive_emo:
-        warning[0] = f"[{current_time}][Heads Up] You're tired and doing something risky. Stay focused and stop the risky action."
+    if fatigue and behav != "no bad behaviours" and emotion not in negtive_emo:
+        warning[0] = f"[Heads Up] You're tired and doing something risky. Stay focused and stop the risky action."
         warning[1] = True
-
+        warning[2] = f"[Heads Up] Fatigue:{fatigue}, Behaviour:{behav}, Emotion:{emotion}"        
         return warning
 
     # Scenario 3: Not fatigued + risky behavior + positive emotion
-    if not fatigue and behav != "no bad behaviours" and emotion in positive_emo:
-        warning[0] = f"[{current_time}][Watch Out]  You're doing something risky. Don't get too excited and lose focus."
+    if not fatigue and behav != "no bad behaviours" and emotion not in negtive_emo:
+        warning[0] = f"[Watch Out]  You're doing something risky. Don't get too excited and lose focus."
         warning[1] = False
-
+        warning[2] = f"Fatigue:{fatigue}, Behaviour:{behav}, Emotion:{emotion}"         
         return warning
 
     # Scenario 4: Fatigue + negative emotion + no dangerous behavior
     if fatigue and behav == "no bad behaviours" and emotion in negtive_emo:
-        warning[0] = f"[{current_time}] [Take a Break] You're tired and in a bad mood, though not doing anything risky. Consider resting or relaxing."
+        warning[0] = f"[Take a Break] You're tired and in a bad mood, though not doing anything risky. Consider resting or relaxing."
         warning[1] = True
-
+        warning[2] = f"Fatigue:{fatigue}, Behaviour:{behav}, Emotion:{emotion}" 
         return warning
 
     if fatigue:
-        warning[0] = f"[{current_time}] You are now tired, please pullover and choose a place to rest."
+        warning[0] = f"You are now tired, please pullover and choose a place to rest."
         warning[1] = True
-
+        warning[2] = f"Fatigue:{fatigue}, Behaviour:{behav}, Emotion:{emotion}" 
         return warning
 
     if behav != "no bad behaviours":
-        warning[0] = f"[{current_time}] You now "+behav+" Please focus on driving!"
+        warning[0] = f"You now "+behav+" Please focus on driving!"
         warning[1] = False
+        warning[2] = f"Fatigue:{fatigue}, Behaviour:{behav}, Emotion:{emotion}" 
         return warning
 
     if emotion in negtive_emo:
-        warning[0] = f"[{current_time}] You are now "+emotion+" Please stay in a normal mindset and focus on driving."
+        warning[0] = f"You are now "+emotion+" Please stay in a normal mindset and focus on driving."
         warning[1] = False
-
+        warning[2] = f"Fatigue:{fatigue}, Behaviour:{behav}, Emotion:{emotion}" 
         return warning
 
 

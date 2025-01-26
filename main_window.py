@@ -122,8 +122,8 @@ class FatigueStatusApp(QWidget):
         result = driver_warning(fatigue, behav, emotion)
         print(result[0])
         print(result[1])
-        if result[0] != "":
-            self.log_display.insertPlainText(f"[{current_time}]{result[0]}\n")
+        if result[2] != "":
+            self.log_display.insertPlainText(f"[{current_time}]{result[2]}\n")
         self.log_display.verticalScrollBar().setValue(self.log_display.verticalScrollBar().maximum())
 
     def show_rest_popup(self, warning):
@@ -229,17 +229,19 @@ class FatigueStatusApp(QWidget):
         self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
         self.update_log(fatigue=fatigue, behav=behav, emotion=emo)
 
-        frame = cv2.resize(frame, (1920,1080), interpolation=cv2.INTER_LINEAR)
-        frame = cv2.flip(frame, 1)
-        show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
         tend = time.time()
         # 计算fps
         fps = 1 / (tend - tstart)
         fps = "%.2f fps" % fps
         # 在图片的左上角标出Fps
-        cv2.putText(frame, fps, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)
+        cv2.putText(frame, fps, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         print(f"fps:{fps}")
+
+        frame = cv2.resize(frame, (1920,1080), interpolation=cv2.INTER_LINEAR)
+        # frame = cv2.flip(frame, 1)
+        show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+        
         self.video_label.setPixmap(QPixmap.fromImage(showImage))
 
     def closeEvent(self, event):
