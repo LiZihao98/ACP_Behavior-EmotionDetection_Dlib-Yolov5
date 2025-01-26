@@ -75,6 +75,18 @@ def mouth_aspect_ratio(mouth):
     return mar
 
 
+def add_fatigue_types(fatigue_mouth, fatigue_eyes, fatigue_perclose):
+    fatigue_types = []
+    if fatigue_mouth:
+        fatigue_types.append("Mouth Fatigue ")
+    if fatigue_eyes:
+        fatigue_types.append("Eye Fatigue ")
+    if fatigue_perclose:
+        fatigue_types.append("Perceptual Closure Fatigue ")
+
+    return fatigue_types  # 返回包含疲劳类型名字的列表
+
+
 def detFatigue(frame, cap):
     # fps = cap.get(cv2.CAP_PROP_FPS)
     # print("fps:", fps)
@@ -150,15 +162,12 @@ def detFatigue(frame, cap):
 
         Roll += 1
         print(f"Roll:{Roll}")
-        print(f"Rolleye:{Rolleye}")
-        print(f"EYE_COUNTER:{EYE_COUNTER}")
-        print(f"fatigue_Mouth:{fatigue_Mouth}")
-        print(f"fatigue_Eyes:{fatigue_Eyes}")
-        print(f"fatigue_Perclose:{fatigue_Perclose}")
         if Rolleye > 30:
             fatigue_Perclose = True
             Rolleye = 0
             Roll = 0
+        else:
+            fatigue_Perclose = False
 
         if Roll == 150:
             perclos = Rolleye/Roll
@@ -172,19 +181,10 @@ def detFatigue(frame, cap):
             # set labels
         else:
             pass
-    
 
         if fatigue_Mouth or fatigue_Eyes or fatigue_Perclose:
             Rolleye=0
             EYE_COUNTER=0
             MOUTH_COUNTER=0
-            fatigue_Perclose = False
-        print("after reset:")
-        print(f"Roll:{Roll}")
-        print(f"Rolleye:{Rolleye}")
-        print(f"EYE_COUNTER:{EYE_COUNTER}")
-        print(f"fatigue_Mouth:{fatigue_Mouth}")
-        print(f"fatigue_Eyes:{fatigue_Eyes}")
-        print(f"fatigue_Perclose:{fatigue_Perclose}")
-
-    return frame, ear, mar, (fatigue_Mouth or fatigue_Eyes or fatigue_Perclose)
+    labels = add_fatigue_types(fatigue_Mouth, fatigue_Eyes, fatigue_Perclose)
+    return frame, ear, mar, (fatigue_Mouth or fatigue_Eyes or fatigue_Perclose), labels

@@ -160,9 +160,17 @@ class FatigueStatusApp(QWidget):
             return
 
         # dlib detection
-        frame, ear, mar, fatigue = detFatigue(frame, self.cap)
+        frame, ear, mar, fatigue, labels = detFatigue(frame, self.cap)
         # 更新疲劳状态的文本
-        self.fatigue_status.setText("Fatigued" if fatigue else "Not Fatigued")
+        if fatigue:
+            fatigueText = ""
+            for label in labels:
+                fatigueText += label
+            self.fatigue_status.setText(fatigueText)
+            self.fatigue_status.setStyleSheet("color: red;")
+        else:
+            self.fatigue_status.setText("Not Fatigued")
+            self.fatigue_status.setStyleSheet("color: black;")
 
         emotion_result = predict(frame, model_emo)
         behavior_result = predict(frame, model_beh)
@@ -179,6 +187,7 @@ class FatigueStatusApp(QWidget):
         showFrame(emotion_result, frame)
         showFrame(behavior_result, frame, [], 20)
 
+        
         # 更新界面上的情绪状态
         self.emotion_status.setText(emo)
         if emo != "neutral":
@@ -193,6 +202,11 @@ class FatigueStatusApp(QWidget):
         else:
             self.behavior_status.setStyleSheet("color: black;")
             self.update_log(fatigue=fatigue, behav=behav, emotion=emo)
+
+
+        self.emotion_status.setText(str(emotion_result[0][0]) if emotion_result else "neutral")
+        self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
+        self.update_log(fatigue=fatigue, behav=behav, emotion=emo)
 
         frame = cv2.resize(frame, (1920,1080), interpolation=cv2.INTER_LINEAR)
         frame = cv2.flip(frame, 1)
