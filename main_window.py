@@ -60,7 +60,7 @@ class FatigueStatusApp(QWidget):
 
         # 视频显示区域
         self.video_label = QLabel(self)
-        self.video_label.setFixedSize(640, 480)
+        self.video_label.setFixedSize(1920, 1080)
         main_layout.addWidget(self.video_label, alignment=Qt.AlignCenter)
 
         # 中部状态显示部分
@@ -136,8 +136,8 @@ class FatigueStatusApp(QWidget):
         # 默认使用索引为 0 的摄像头
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FPS, 30)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 64)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 48)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 680)
         # 检查摄像头是否成功打开
         if not self.cap.isOpened():
             print("Failed to open the camera.")
@@ -181,7 +181,7 @@ class FatigueStatusApp(QWidget):
         self.behavior_status.setText(str(behavior_result[0][0]) if behavior_result else "no bad behavior")
         self.update_log(fatigue=fatigue, behav=behav, emotion=emo)
 
-        frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_LINEAR)
+        frame = cv2.resize(frame, (1920,1080), interpolation=cv2.INTER_LINEAR)
         frame = cv2.flip(frame, 1)
         show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)

@@ -78,6 +78,7 @@ def mouth_aspect_ratio(mouth):
 def detFatigue(frame, cap):
     # fps = cap.get(cv2.CAP_PROP_FPS)
     # print("fps:", fps)
+    
     global THRESHOLD_EAR, THRESHOLD_MAR, EYE_COUNTER, EYE_TOTAL, MOUTH_COUNTER, \
         MOUTH_TOTAL, Roll, Rolleye, Rollmouth, fatigue_Mouth, fatigue_Eyes, fatigue_Perclose
 
@@ -88,6 +89,7 @@ def detFatigue(frame, cap):
     ear = 0
     mar = 0
     for face in faces:
+        print("..............")
         faceLandmarks = landmarkFinder(grayImage, face)
         faceLandmarks = face_utils.shape_to_np(faceLandmarks)
 
@@ -134,28 +136,30 @@ def detFatigue(frame, cap):
         else:
             MOUTH_COUNTER = 0
 
-        # print("EYE_COUNTER:" + str(EYE_COUNTER))
-        # print("MOUTH_COUNTER:" + str(MOUTH_COUNTER))
-        # print("Rolleye:" + str(Rolleye))
-
         # Fatigue detected
         # Yawn detected
-        if MOUTH_COUNTER > 3:
+        if MOUTH_COUNTER > 36:
             fatigue_Mouth = True
         else:
             fatigue_Mouth = False
         # When the continuous closing time lasts for 2 seconds, it is considered that the user may be fatigue.
-        if EYE_COUNTER > 2:
+        if EYE_COUNTER > 24:
             fatigue_Eyes = True
         else:
             fatigue_Eyes = False
 
         Roll += 1
+        print(f"Roll:{Roll}")
+        print(f"Rolleye:{Rolleye}")
+        print(f"EYE_COUNTER:{EYE_COUNTER}")
+        print(f"fatigue_Mouth:{fatigue_Mouth}")
+        print(f"fatigue_Eyes:{fatigue_Eyes}")
+        print(f"fatigue_Perclose:{fatigue_Perclose}")
         if Rolleye > 30:
             fatigue_Perclose = True
             Rolleye = 0
             Roll = 0
-        print(Roll)
+
         if Roll == 150:
             perclos = Rolleye/Roll
             # print(perclos)
@@ -168,10 +172,19 @@ def detFatigue(frame, cap):
             # set labels
         else:
             pass
+    
 
-        if fatigue_Mouth | fatigue_Eyes | fatigue_Perclose:
+        if fatigue_Mouth or fatigue_Eyes or fatigue_Perclose:
             Rolleye=0
             EYE_COUNTER=0
             MOUTH_COUNTER=0
+            fatigue_Perclose = False
+        print("after reset:")
+        print(f"Roll:{Roll}")
+        print(f"Rolleye:{Rolleye}")
+        print(f"EYE_COUNTER:{EYE_COUNTER}")
+        print(f"fatigue_Mouth:{fatigue_Mouth}")
+        print(f"fatigue_Eyes:{fatigue_Eyes}")
+        print(f"fatigue_Perclose:{fatigue_Perclose}")
 
-    return frame, ear, mar, (fatigue_Mouth | fatigue_Eyes | fatigue_Perclose)
+    return frame, ear, mar, (fatigue_Mouth or fatigue_Eyes or fatigue_Perclose)

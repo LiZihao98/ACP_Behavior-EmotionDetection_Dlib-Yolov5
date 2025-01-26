@@ -17,7 +17,7 @@ class MainWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle("safedrive_App")
-        self.setGeometry(100, 100, 300, 300)
+        self.setGeometry(300, 300, 900, 900)
 
         pixmap = QPixmap("safedrive_logo.webp")
         resized_pixmap = pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
@@ -36,6 +36,16 @@ class MainWindow(QWidget):
         layout.addWidget(exitButton)
 
         self.setLayout(layout)
+
+        # 获取屏幕的几何尺寸
+        screen_geometry = QApplication.primaryScreen().geometry()
+
+        # 计算窗口的中心位置
+        x = (screen_geometry.width() - self.width()) // 2
+        y = (screen_geometry.height() - self.height()) // 2
+
+        # 将窗口移到计算出的中心位置
+        self.move(x, y)
 
     def startDetection(self):
         # 创建并显示 FatigueStatusApp 窗口
