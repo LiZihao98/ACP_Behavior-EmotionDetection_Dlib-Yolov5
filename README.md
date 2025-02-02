@@ -19,7 +19,6 @@ git git@github.com:LiZihao98/ACP_Behavior-EmotionDetection_Dlib-Yolov5.git
 conda create -n yolov5-env python=3.8 -y
 conda activate yolov5-env
 pip install -r requirements.txt
-```\
 ```
 
 ### 3️⃣ Run the system
