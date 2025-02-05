@@ -84,13 +84,10 @@ def add_fatigue_types(fatigue_mouth, fatigue_eyes, fatigue_perclose):
     if fatigue_perclose:
         fatigue_types.append("Perceptual Closure Fatigue ")
 
-    return fatigue_types  # 返回包含疲劳类型名字的列表
+    return fatigue_types
 
 
-def detFatigue(frame, cap):
-    # fps = cap.get(cv2.CAP_PROP_FPS)
-    # print("fps:", fps)
-    
+def detFatigue(frame):
     global THRESHOLD_EAR, THRESHOLD_MAR, EYE_COUNTER, EYE_TOTAL, MOUTH_COUNTER, \
         MOUTH_TOTAL, Roll, Rolleye, Rollmouth, fatigue_Mouth, fatigue_Eyes, fatigue_Perclose
 
@@ -171,20 +168,18 @@ def detFatigue(frame, cap):
 
         if Roll == 150:
             perclos = Rolleye/Roll
-            # print(perclos)
             if perclos > 0.2:
                 fatigue_Perclose = True
             else:
                 fatigue_Perclose = False
             Roll = 0
             Rolleye = 0
-            # set labels
         else:
             pass
 
         if fatigue_Mouth or fatigue_Eyes or fatigue_Perclose:
-            Rolleye=0
-            EYE_COUNTER=0
-            MOUTH_COUNTER=0
+            Rolleye = 0
+            EYE_COUNTER = 0
+            MOUTH_COUNTER = 0
     labels = add_fatigue_types(fatigue_Mouth, fatigue_Eyes, fatigue_Perclose)
     return frame, ear, mar, (fatigue_Mouth or fatigue_Eyes or fatigue_Perclose), labels

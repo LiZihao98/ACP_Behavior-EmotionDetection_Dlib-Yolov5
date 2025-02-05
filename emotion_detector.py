@@ -51,9 +51,10 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleF
     im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
     return im, ratio, (dw, dh)
 
+
 def predict(frame, model, half=False, device='', imgsz=640, opt_conf_thres=0.25, opt_iou_thres=0.45):
     # Initialize
-    device = select_device(device)
+    # device = select_device(device)
     half &= device.type != 'cpu'
     # Load model
 
@@ -87,6 +88,7 @@ def predict(frame, model, half=False, device='', imgsz=640, opt_conf_thres=0.25,
     ret = []
     for i, det in enumerate(pred):  # detections per image
         if len(det):
+            print("ssssss")
             # Rescale boxes from img_size to im0 size
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], frame.shape).round()
             # Write results
