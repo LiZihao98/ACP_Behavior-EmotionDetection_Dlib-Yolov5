@@ -7,6 +7,24 @@ This project is based on **YOLOv5** and **dlib**, designed to detect **unsafe dr
 - **Real-time Detection**: Fast and accurate behavior recognition using YOLOv5 and dlib
 - **Multi-Class Recognition**: Supports multiple dangerous driving behaviors, emotions, and fatigue detection
 - **Fatigue Monitoring**: Uses dlib to track eye blink frequency and yawning to detect drowsy drivers
+
+## 📂 Datasets
+The model is trained on two distinct datasets:
+### Emotion Detection Dataset: Available at:
+```bash
+https://universe.roboflow.com/muhammad-usama-ot86z/fer-final-project-yzgrn-wwdxc-55aip
+```
+### Dangerous Driving Behavior Dataset: Accessible via the following link:
+```bash
+https://universe.roboflow.com/driver-monitoring/dmd-tfiw0
+```
+
+## 🏋️ Model Training
+The model is trained using YOLOv5 V6.0, which has been selected for its stability and performance. 
+While multiple versions of YOLOv5 are available, version 6.0 is considered the most reliable for this application. For detailed training instructions and additional versions, please refer to the official YOLOv5 repository:
+```bash
+https://github.com/ultralytics/yolov5
+``` 
 ## 🚀 Installation & Execution
 
 ### 1️⃣ **Clone the Project**
