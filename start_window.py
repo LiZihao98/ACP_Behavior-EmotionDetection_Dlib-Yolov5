@@ -18,7 +18,6 @@ class MainWindow(QWidget):
     def initUI(self):
         self.setWindowTitle("safedrive_App")
         self.setGeometry(300, 300, 900, 900)
-        # 设置字体加粗并增大
         self.setStyleSheet("""
             QLabel {
                 font-size: 28px;  /* 增大字体 */
