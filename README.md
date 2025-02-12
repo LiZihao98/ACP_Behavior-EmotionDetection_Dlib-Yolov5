@@ -25,6 +25,10 @@ While multiple versions of YOLOv5 are available, version 6.0 is considered the m
 ```bash
 https://github.com/ultralytics/yolov5
 ``` 
+There's also a pretrained weight named shape_predictor_68_face_landmarks.dat needs to be downloaded. Please put it in the existing file weight to make sure dlib run smoothly.
+```bash
+https://github.com/Practical-CV/Facial-Landmarks-Detection-with-DLIB
+```
 ## 🚀 Installation & Execution
 
 ### 1️⃣ **Clone the Project**
